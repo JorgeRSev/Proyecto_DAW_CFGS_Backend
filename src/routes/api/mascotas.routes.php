@@ -1,9 +1,9 @@
 <?php
 require_once __DIR__ . "/../../config/database.php";
-require_once __DIR__ . "/../../controllers/MascotaController.php";
-require_once __DIR__ . "/../../middleware/authMiddleware.php";
+require_once __DIR__ . "/../../controllers/mascotaController.php";
+require_once __DIR__ . "/../../middlewares/auth.middlewares.php";
 
-$user = JwtMiddleware::check();
+$user = AuthMiddleware::verifyToken();
 
 $database = new Database();
 $db = $database->getConnection();
@@ -11,51 +11,29 @@ $controller = new MascotaController($db);
 
 $method = $_SERVER['REQUEST_METHOD'];
 $id = $_GET['id'] ?? null;
+
 function getInputData() {
-    $data = json_decode(file_get_contents("php://input"));
-    return $data ?: null;
+    return json_decode(file_get_contents("php://input"));
 }
 
-switch ($method) {
-    case "GET":
-        $id ? $controller->getById($id) : $controller->getAll();
-        break;
-
-    case "POST":
+    if ($method === "GET") {
+        $id ? $controller->getById($id) : $controller->getAll($user->id);
+    } 
+    elseif ($method === "POST") {
         $data = getInputData();
-        if ($data && isset($data->nombre, $data->raza, $data->edad, $data->observaciones, $data->id_dueno)) {
+        if ($data && isset($data->nombre, $data->raza, $data->edad)) {
+            $data->id_dueno = $user->id;
             $controller->create($data);
-        } else {
-            http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Faltan datos obligatorios"]);
         }
-        break;
-
-    case "PUT":
+    } 
+    elseif ($method === "PUT") {
+        $data = getInputData();
+        if ($id && $data) {
+            $controller->update($id, $data, $user->id);
+        }
+    } 
+    elseif ($method === "DELETE") {
         if ($id) {
-            $data = getInputData();
-            if ($data && isset($data->nombre, $data->raza, $data->edad, $data->observaciones)) {
-                $controller->update($id, $data);
-            } else {
-                http_response_code(400);
-                echo json_encode(["success" => false, "message" => "Faltan datos para actualizar"]);
-            }
-        } else {
-            http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Falta ID"]);
+            $controller->delete($id, $user->id);
         }
-        break;
-
-    case "DELETE":
-        if ($id) {
-            $controller->delete($id);
-        } else {
-            http_response_code(400);
-            echo json_encode(["success" => false, "message" => "Falta ID"]);
-        }
-        break;
-
-    default:
-        http_response_code(405);
-        echo json_encode(["success" => false, "message" => "Método no permitido"]);
-}
+    }
