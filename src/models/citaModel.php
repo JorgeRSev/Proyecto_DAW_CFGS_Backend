@@ -1,5 +1,5 @@
 <?php
-    
+
     Class Cita{
     private $conn;
     private $table = "citas";
@@ -81,5 +81,27 @@
         $stmt->bindParam(":id", $id);
 
         return $stmt->execute();
+    }
+
+    public function getCitasByUsuario($userId){
+
+        $query = "
+            SELECT 
+                c.id,
+                c.fecha,
+                c.hora,
+                c.estado,
+                m.nombre AS mascota,
+                u.nombre AS peluquera
+            FROM citas c
+            JOIN mascotas m ON c.id_mascota = m.id
+            JOIN usuarios u ON c.id_peluquera = u.id
+            WHERE m.id_dueno = :user_id
+            ORDER BY c.fecha ASC, c.hora ASC";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $userId);
+        $stmt->execute();
+
+        return $stmt;
     }
 }
