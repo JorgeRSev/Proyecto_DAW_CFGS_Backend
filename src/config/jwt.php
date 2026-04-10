@@ -6,7 +6,7 @@ use Firebase\JWT\JWT;
 
 class JwtHandler {
 
-    private $secret = "CLAVE_SUPER_SIMPLE_123";
+    private $secret = "pelupatas_super_secret_key_2026";
 
     public function generateToken($user)
     {
@@ -23,7 +23,11 @@ class JwtHandler {
     }
 
     public function validate($token)
-    {
+{
+    try {
         return JWT::decode($token, new \Firebase\JWT\Key($this->secret, 'HS256'));
+    } catch (Exception $e) {
+        return false;
     }
+}
 }
