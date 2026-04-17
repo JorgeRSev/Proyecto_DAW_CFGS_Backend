@@ -39,7 +39,7 @@ class AuthMiddleware {
 
     public static function requireRol(array $rolesPermitidos){
         $user = self::verifyToken();
-        
+
         if (!in_array($user->rol, $rolesPermitidos)) {
             http_response_code(403);
             echo json_encode([
@@ -49,21 +49,6 @@ class AuthMiddleware {
             exit;
         }
         return $user;
-
-    }
-
-    function getUserFromToken() {
-        $headers = getallheaders();
-        if (!isset($headers['Authorization'])){
-            return null;
-        }
-        $token = str_replace('Bearer ', '', $headers['Authorization']);
-        try {
-            $decoded = decodeJWT($token);
-            return $decoded->user_id ?? null;
-        } catch (Exception $e) {
-            return null;
-        }
     }
 }
 
