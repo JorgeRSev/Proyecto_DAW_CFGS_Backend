@@ -37,6 +37,21 @@ class AuthMiddleware {
         }
     }
 
+    public static function requireRol(array $rolesPermitidos){
+        $user = self::verifyToken();
+        
+        if (!in_array($user->rol, $rolesPermitidos)) {
+            http_response_code(403);
+            echo json_encode([
+                "success" => false,
+                "message" => "Acceso denegado: rol no permitido"
+            ]);
+            exit;
+        }
+        return $user;
+
+    }
+
     function getUserFromToken() {
         $headers = getallheaders();
         if (!isset($headers['Authorization'])){
