@@ -30,7 +30,8 @@ class UsuarioController {
             "token" => $token,
             "usuario" => [
                 "id" => $usuario['id'],
-                "email" => $usuario['email']
+                "email" => $usuario['email'],
+                "rol" => $usuario['rol']
             ]
         ]);
     }
