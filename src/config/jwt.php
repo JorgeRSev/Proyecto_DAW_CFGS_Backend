@@ -15,7 +15,8 @@ class JwtHandler {
             "exp" => time() + 3600,
             "data" => [
                 "id" => $user['id'],
-                "email" => $user['email']
+                "email" => $user['email'],
+                "rol"   => $user['rol']
             ]
         ];
 
