@@ -10,7 +10,7 @@
 
     public function createCita($fecha, $hora, $id_mascota, $id_peluquera, $notas){
         $query ="INSERT INTO " . $this->table .
-        "       SET fecha = :fecha,
+                " SET fecha = :fecha,
                 hora = :hora,
                 id_mascota = :id_mascota,
                 id_peluquera = :id_peluquera,
@@ -26,8 +26,23 @@
     }
 
     public function getAllCitas(){
-        $query ="SELECT * FROM " . $this->table .
-                " ORDER BY fecha DESC, hora DESC";
+        $query = "
+            SELECT
+                c.id,
+                c.fecha,
+                c.hora,
+                c.estado,
+                c.notas,
+                m.nombre  AS mascota,
+                m.raza    AS raza,
+                d.nombre  AS dueno,
+                p.nombre  AS peluquera
+            FROM citas c
+            JOIN mascotas  m ON c.id_mascota   = m.id
+            JOIN usuarios  d ON m.id_dueno     = d.id
+            JOIN usuarios  p ON c.id_peluquera = p.id
+            ORDER BY c.fecha ASC, c.hora ASC";
+ 
         $stmt = $this->conn->prepare($query);
         $stmt->execute();
         return $stmt;
@@ -43,6 +58,41 @@
         return $stmt->fetch(PDO::FETCH_ASSOC);
     }
 
+    public function getCitasByUsuario($userId){
+
+        $query = "
+            SELECT 
+                c.id,
+                c.fecha,
+                c.hora,
+                c.estado,
+                c.notas,
+                m.nombre AS mascota,
+                u.nombre AS peluquera
+            FROM citas c
+            JOIN mascotas m ON c.id_mascota = m.id
+            JOIN usuarios u ON c.id_peluquera = u.id
+            WHERE m.id_dueno = :user_id
+            ORDER BY c.fecha ASC, c.hora ASC";
+
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":user_id", $userId);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
+        public function getCitasByPeluquera($id_peluquera){
+        $query ="SELECT * FROM " . $this->table .
+                " WHERE id_peluquera = :id_peluquera
+                ORDER BY fecha ASC, hora ASC";             
+        $stmt = $this->conn->prepare($query);
+        $stmt->bindParam(":id_peluquera", $id_peluquera);
+        $stmt->execute();
+
+        return $stmt;
+    }
+
     public function getCitasByMascota($id_mascota){
         $query ="SELECT * FROM " . $this->table .
                 " WHERE id_mascota = :id_mascota";
@@ -50,16 +100,6 @@
         $stmt->bindParam(":id_mascota", $id_mascota);
         $stmt->execute();
         
-        return $stmt;
-    }
-
-    public function getCitasByPeluquera($id_peluquera){
-        $query ="SELECT * FROM " . $this->table .
-                " WHERE id_peluquera = :id_peluquera";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":id_peluquera", $id_peluquera);
-        $stmt->execute();
-
         return $stmt;
     }
 
@@ -81,27 +121,5 @@
         $stmt->bindParam(":id", $id);
 
         return $stmt->execute();
-    }
-
-    public function getCitasByUsuario($userId){
-
-        $query = "
-            SELECT 
-                c.id,
-                c.fecha,
-                c.hora,
-                c.estado,
-                m.nombre AS mascota,
-                u.nombre AS peluquera
-            FROM citas c
-            JOIN mascotas m ON c.id_mascota = m.id
-            JOIN usuarios u ON c.id_peluquera = u.id
-            WHERE m.id_dueno = :user_id
-            ORDER BY c.fecha ASC, c.hora ASC";
-        $stmt = $this->conn->prepare($query);
-        $stmt->bindParam(":user_id", $userId);
-        $stmt->execute();
-
-        return $stmt;
-    }
+    }  
 }
