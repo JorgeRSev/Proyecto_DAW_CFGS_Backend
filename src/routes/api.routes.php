@@ -32,6 +32,10 @@
         case "login":
             require_once __DIR__ . "/api/usuario.routes.php";
             break;
+        
+        case "usuarios":
+            require_once __DIR__ . "/api/usuarios.routes.php";
+            break;
 
         default:
             http_response_code(404);
