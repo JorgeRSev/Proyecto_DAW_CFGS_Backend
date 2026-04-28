@@ -12,27 +12,25 @@ $controller = new MascotaController($db);
 $method = $_SERVER['REQUEST_METHOD'];
 $id = $_GET['id'] ?? null;
 
-function getInputData() {
-    return json_decode(file_get_contents("php://input"));
-}
+function getInputData()
+    {
+        return json_decode(file_get_contents("php://input"));
+    }
 
     if ($method === "GET") {
         $id ? $controller->getById($id) : $controller->getAll($user->id);
-    } 
-    elseif ($method === "POST") {
+    } elseif ($method === "POST") {
         $data = getInputData();
         if ($data && isset($data->nombre, $data->raza, $data->edad)) {
             $data->id_dueno = $user->id;
             $controller->create($data);
         }
-    } 
-    elseif ($method === "PUT") {
+    } elseif ($method === "PUT") {
         $data = getInputData();
         if ($id && $data) {
             $controller->update($id, $data, $user->id);
         }
-    } 
-    elseif ($method === "DELETE") {
+    } elseif ($method === "DELETE") {
         if ($id) {
             $controller->delete($id, $user->id);
         }
