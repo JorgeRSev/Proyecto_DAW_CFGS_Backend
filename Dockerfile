@@ -4,6 +4,8 @@ RUN docker-php-ext-install pdo pdo_mysql
 
 RUN a2enmod rewrite
 
+RUN echo "ServerName localhost" >> /etc/apache2/apache2.conf
+
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 COPY . /var/www/html
 
