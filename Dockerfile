@@ -12,4 +12,7 @@ RUN a2enmod rewrite
 COPY apache.conf /etc/apache2/sites-available/000-default.conf
 COPY . /var/www/html
 
+RUN echo "ESTOY USANDO DOCKERFILE" && sleep 5
+
+
 EXPOSE 80
