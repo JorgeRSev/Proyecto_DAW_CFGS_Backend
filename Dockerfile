@@ -8,4 +8,5 @@ COPY apache.conf /etc/apache2/sites-available/000-default.conf
 
 COPY . /var/www/html
 
+ENV PORT=80
 EXPOSE 80
