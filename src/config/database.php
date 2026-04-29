@@ -1,27 +1,43 @@
 <?php
+class Database
+{
 
-class Database {
-    private $host = "localhost";
-    private $db_name = "peluqueria_canina";
-    private $username = "root";
-    private $password = "Admin12345";
-    private $conn;
+    private string $host;
+    private string $port;
+    private string $db_name;
+    private string $username;
+    private string $password;
+    private ?PDO $conn = null;
 
-    public function getConnection() {
+    public function __construct()
+    {
+        $this->host = getenv('DB_HOST') ?: 'localhost';
+        $this->port = getenv('DB_PORT') ?: '3306';
+        $this->db_name = getenv('DB_NAME') ?: 'peluqueria_canina';
+        $this->username = getenv('DB_USER') ?: 'root';
+        $this->password = getenv('DB_PASS') ?: 'Admin12345';
+    }
 
+    public function getConnection(): ?PDO
+    {
         $this->conn = null;
         try {
-            $this->conn = new PDO(
-                "mysql:host=" . $this->host . ";dbname=" . $this->db_name . ";charset=utf8",
-                $this->username,
-                $this->password
-            );
+            $dsn = "mysql:host={$this->host};port={$this->port};dbname={$this->db_name};charset=utf8mb4";
+
+            $this->conn = new PDO($dsn, $this->username, $this->password, [
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4 COLLATE utf8mb4_unicode_ci",
+            ]);
 
             $this->conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        } catch(PDOException $exception) {
-            echo "Error de conexión: " . $exception->getMessage();
-        }
 
+        } catch (PDOException $e) {
+            http_response_code(500);
+            echo json_encode([
+                "success" => false,
+                "message" => "Error de conexión a la base de datos"
+            ]);
+            exit;
+        }
         return $this->conn;
     }
 }
